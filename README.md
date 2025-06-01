@@ -36,29 +36,38 @@ Modify the `config.json` file to set:
 ### Running the Solver
 ```bash
 python 1D_steady_advection-diffusion.py
+```
 
-Visualization
-The solution is automatically visualized using the included plotting functions, showing:
+### Visualization
+The solution is automatically visualized using the included plotting function, showing:
 
 Computed vs. exact temperature profiles
 Heat map representation of the temperature field
 Peclet number and other relevant parameters
-Code Structure
-1D_steady_advection-diffusion.py: Main solver implementation
-plot.py: Visualization functions
-config.json: Configuration parameters
-Dependencies
+
+### Code Structure
+- 1D_steady_advection-diffusion.py: Main solver implementation
+- plot.py: Visualization functions
+- config.json: Configuration parameters
+
+### Dependencies
 NumPy: For numerical operations
 SciPy: For sparse matrix operations
 Matplotlib: For visualization
 JSON: For configuration handling
 
-Mathematical Formulation
+### Mathematical Formulation
 The discretization schemes transform the continuous differential equation into a tridiagonal linear system:
 
-Central Difference:
-First-Order Upwind:
+### Central Difference:
+
+    -(0.5*Pe*dx + 1)*T[i-1] + 2*T[i] + (0.5*Pe*dx - 1)*T[i+1] = 0
+
+### First-Order Upwind:
+
+    -(Pe*dx + 1)*T[i-1] + (2 + Pe*dx)*T[i] - T[i+1] = 0
+
 This system is solved efficiently using sparse matrix techniques.
 
-Example Results
-The solution visualizer displays both the numerical solution and analytical solution for comparison, along with the normalized error. The heatmap provides an intuitive visualization of the temperature distribution. ```
+### Example Results
+The solution visualizer displays both the numerical solution and analytical solution for comparison. The heatmap provides an intuitive visualization of the temperature distribution.
