@@ -23,10 +23,9 @@ with open(config_path, "r") as f:
     config = json.load(f)  # read parameters from a config json file
 M = config["M"] # number of grid points
 ks = config["scheme"] # scheme: 0 --> central difference, 1 --> upwind
+Pe = config["peclet"] # Peclet number
 
-# Fixed paramaters: (don't change)
-L=1 # total length of the domain
-Pe = 10 # Peclet number 
+L = 1 # total length of the domain
 
 
 # Grid setup
@@ -59,19 +58,15 @@ diagu = we*np.ones((M-2)) # upper diagonal
 A = sps.spdiags([diagl, diagp, diagu], [-1, 0, 1], M-2, M-2, format='csc') # creating system matrix
 
 # Resolution
-#known term
-rhs= np.zeros(M-2)
-rhs[0] = rhs[0] - ww*T[0]
-rhs[-1] = rhs[-1] - we*T[-1]
+rhs= np.zeros(M-2) # right-hand side initialization (A*T = b) 
+rhs[0] = rhs[0] - ww*T[0] # -Ww*T1
+rhs[-1] = rhs[-1] - we*T[-1] # -We*T(M)
 Tint = sps.linalg.spsolve(A,rhs)
-def solution(T,Tint,M,withArrays=True):
-    if withArrays:
-        T[1:M-1] = Tint[0:M-2]
-    else:
-        for jx in range(1,M-1):
-            T[jx] = Tint[jx-1]
+
+def solution(T,Tint,M):
+    T[1:M-1] = Tint[0:M-2]
     return T
 
-T=solution(T,Tint,M,withArrays=True)
+T = solution(T,Tint,M)
 
 plot_solution_steady(x,T,Texact,Pe,dx)
