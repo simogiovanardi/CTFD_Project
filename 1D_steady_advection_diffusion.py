@@ -70,3 +70,9 @@ def solution(T,Tint,M):
 T = solution(T,Tint,M)
 
 plot_solution_steady(x,T,Texact,Pe,dx)
+
+
+
+from compare_results import compare_results
+
+compare_results(config, high_M=100, M_values=[3, 4, 5, 6])
