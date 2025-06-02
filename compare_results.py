@@ -94,7 +94,7 @@ def compare_multiple_M(Pe, ks, high_M=100, M_values=[3, 4, 5, 6], L=1):
         Pec = Pe*dx
         marker = markers[i % len(markers)]
         plt.plot(x, T, marker=marker, linestyle='-', 
-                label=f'Pec={Pec:.3f} (M={M})', markevery=max(1, M//10))
+                label=f'Pec={Pec:.2f} (M={M})', markevery=max(1, M//10))
     
     # Add plot details
     scheme_name = "Central Difference" if ks == 0 else "Upwind"
@@ -117,4 +117,4 @@ ks = config["scheme"]
 Pe = config["peclet"] 
 
 # Compare multiple M values
-compare_multiple_M(Pe, ks, high_M=100, M_values=[21, 11, 6])
+compare_multiple_M(Pe, ks, high_M=100, M_values=[21, 11, 6, 5, 4, 3])
