@@ -15,7 +15,7 @@ import scipy.sparse.linalg as linalg
 import matplotlib.pyplot as plt
 from plot import plot_solution_steady
 
-def solve_advection_diffusion(M, ks, Pe, L=1):
+def solve_advection_diffusion(M, ks, Pe, L=1, return_errors=False):
     """
     Solve the 1D steady advection-diffusion equation.
     
@@ -65,7 +65,11 @@ def solve_advection_diffusion(M, ks, Pe, L=1):
     # Solution
     T[1:M-1] = Tint[0:M-2]
     
-    return x, T, Texact
+    if return_errors:
+        L2_error, inf_error = calculate_errors(T, Texact)
+        return x, T, Texact, L2_error, inf_error
+    else:
+        return x, T, Texact
 
 def compare_multiple_M(Pe, ks, high_M=100, M_values=[3, 4, 5, 6], L=1):
     """
@@ -105,16 +109,107 @@ def compare_multiple_M(Pe, ks, high_M=100, M_values=[3, 4, 5, 6], L=1):
     plt.legend()
     plt.show()
 
-
+def calculate_errors(T_numerical, T_exact):
+    """
+    Calculate L2 norm error (root mean square) and infinity norm error (L∞)
     
+    Parameters:
+        T_numerical: Numerical solution array
+        T_exact: Exact solution array
+        
+    Returns:
+        tuple: (L2_error, inf_error)
+    """
+    # Differences
+    diff = T_numerical - T_exact
+    
+    # L2 norm error (root mean square)
+    L2_error = np.sqrt(np.mean(np.square(diff)))
+    
+    # Infinity norm error (L∞)
+    inf_error = np.max(np.abs(diff))
+    
+    return L2_error, inf_error
 
-script_dir = os.path.dirname(os.path.abspath(__file__))  # path to script
-config_path = os.path.join(script_dir, "config.json")
-
-with open(config_path, "r") as f:
-    config = json.load(f)
-ks = config["scheme"] 
-Pe = config["peclet"] 
-
-# Compare multiple M values
-compare_multiple_M(Pe, ks, high_M=100, M_values=[21, 11, 6, 5, 4, 3])
+def plot_error_convergence(Pe, ks, dx_values=None, M_values=None, L=1):
+    """
+    Plot L2 and L-infinity errors against grid spacing on a bilogarithmic plot.
+    
+    Parameters:
+        Pe (float): Peclet number
+        ks (int): Scheme type
+        dx_values (list): Specific dx values to use (optional)
+        M_values (list): Specific M values to use (optional)
+        L (float): Domain length
+    """
+    # Handle input parameters
+    if dx_values is None and M_values is None:
+        # Default: use logarithmically spaced M values
+        M_values = [3, 4, 6, 11, 21, 41, 81]
+    
+    # Calculate dx from M or vice versa
+    if dx_values is not None:
+        M_values = [int(L/dx) + 1 for dx in dx_values]
+        # Recalculate exact dx values based on M
+        dx_values = [L/(M-1) for M in M_values]
+    else:
+        dx_values = [L/(M-1) for M in M_values]
+    
+    # Arrays to store results
+    L2_errors = []
+    inf_errors = []
+    pec_values = []
+    
+    # Calculate errors for each grid spacing
+    for i, M in enumerate(M_values):
+        _, T, Texact, L2_error, inf_error = solve_advection_diffusion(M, ks, Pe, L, return_errors=True)
+        dx = dx_values[i]
+        pec = Pe*dx
+        
+        L2_errors.append(L2_error)
+        inf_errors.append(inf_error)
+        pec_values.append(pec)
+    
+    # Create bilogarithmic plot
+    plt.figure(figsize=(10, 6))
+    plt.loglog(dx_values, L2_errors, 'o-', label='L2 Norm Error')
+    plt.loglog(dx_values, inf_errors, 's-', label='L∞ Norm Error')
+    
+    # Add reference slopes for first and second order convergence
+    x_ref = np.array([min(dx_values), max(dx_values)])
+    for order, style, color in zip([1, 2], ['--', '-.'], ['gray', 'black']):
+        y_ref = inf_errors[-1]*(x_ref/dx_values[-1])**order
+        plt.loglog(x_ref, y_ref, linestyle=style, color=color, label=f'Order {order}')
+    
+    # Add plot details
+    scheme_name = "Central Difference" if ks == 0 else "Upwind"
+    plt.title(f'Error Convergence Analysis, Pe={Pe}, {scheme_name} Scheme')
+    plt.xlabel('Grid Spacing (dx)')
+    plt.ylabel('Error Norm')
+    plt.grid(True, which="both")
+    plt.legend()
+    
+    # Print convergence data
+    print("\nError Convergence Analysis:")
+    print("---------------------------------------------------------------------------------")
+    print("  M  |    dx    |   Pec    | L2 Error      | L∞ Error      | L2 Order | L∞ Order")
+    print("---------------------------------------------------------------------------------")
+    
+    for i in range(len(M_values)):
+        if i > 0:
+            # Calculate orders of convergence
+            L2_order = np.log(L2_errors[i-1]/L2_errors[i]) / np.log(dx_values[i-1]/dx_values[i])
+            inf_order = np.log(inf_errors[i-1]/inf_errors[i]) / np.log(dx_values[i-1]/dx_values[i])
+            print(f"{M_values[i]:4d} | {dx_values[i]:.6f} | {pec_values[i]:.6f} | {L2_errors[i]:.4e} | {inf_errors[i]:.4e} | {L2_order:.4f} | {inf_order:.4f}")
+        else:
+            print(f"{M_values[i]:4d} | {dx_values[i]:.6f} | {pec_values[i]:.6f} | {L2_errors[i]:.4e} | {inf_errors[i]:.4e} | {'---':^8} | {'---':^10}")
+    
+    plt.show()
+    
+    return {
+        'M_values': M_values,
+        'dx_values': dx_values, 
+        'pec_values': pec_values,
+        'L2_errors': L2_errors,
+        'inf_errors': inf_errors
+    }
