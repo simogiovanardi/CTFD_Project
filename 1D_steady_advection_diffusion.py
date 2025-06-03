@@ -72,10 +72,10 @@ def solution(T,Tint,M):
 T = solution(T,Tint,M)
 
 # Plot the solution (fixed M)
-# plot_solution_steady(x,T,Texact,Pe,dx)
+plot_solution_steady(x,T,Texact,Pe,dx)
 
 # Compare multiple M values to evaluate Pec
 # compare_multiple_M(Pe, ks, high_M=100, M_values=[21, 11, 6, 5, 4, 3])
 
 # Evaluate the accuracy (Errors L2 & L∞)
-plot_error_convergence(Pe, ks, dx_values=[0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0001, 0.00001], L=L)
+# plot_error_convergence(Pe, ks, dx_values=[0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0001, 0.00001], L=L)
