@@ -145,7 +145,7 @@ def plot_error_convergence(Pe, ks, dx_values=None, M_values=None, L=1):
     # Handle input parameters
     if dx_values is None and M_values is None:
         # Default: use logarithmically spaced M values
-        M_values = [3, 4, 6, 11, 21, 41, 81]
+        M_values = [3, 5, 11, 21, 41, 101, 201, 401, 1001, 10000]
     
     # Calculate dx from M or vice versa
     if dx_values is not None:
@@ -179,7 +179,7 @@ def plot_error_convergence(Pe, ks, dx_values=None, M_values=None, L=1):
     x_ref = np.array([min(dx_values), max(dx_values)])
     for order, style, color in zip([1, 2], ['--', '-.'], ['gray', 'black']):
         y_ref = inf_errors[-1]*(x_ref/dx_values[-1])**order
-        plt.loglog(x_ref, y_ref, linestyle=style, color=color, label=f'Order {order}')
+        plt.loglog(x_ref, y_ref, linestyle=style, color=color, label=f'Accuracy order: {order}')
     
     # Add plot details
     scheme_name = "Central Difference" if ks == 0 else "Upwind"
@@ -192,7 +192,7 @@ def plot_error_convergence(Pe, ks, dx_values=None, M_values=None, L=1):
     # Print convergence data
     print("\nError Convergence Analysis:")
     print("---------------------------------------------------------------------------------")
-    print("  M  |    dx    |   Pec    | L2 Error      | L∞ Error      | L2 Order | L∞ Order")
+    print("  M  |    dx    |   Pec    | L2 Error     | L∞ Error      | L2 Order | L∞ Order")
     print("---------------------------------------------------------------------------------")
     
     for i in range(len(M_values)):
