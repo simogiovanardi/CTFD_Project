@@ -82,6 +82,6 @@ T = solution(T,Tint,M)
 num_points = 20  # Change this to control how many points you want
 dx_values = np.logspace(np.log10(0.5), -5, num_points)
 
-plot_error_convergence(Pe, ks, dx_values, L=L)
+plot_error_convergence(Pe, ks, dx_values, L=L) 
                        
 # dx_values = [0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.003, 0.001, 0.0001, 0.0002, 0.0005, 0.00001]
